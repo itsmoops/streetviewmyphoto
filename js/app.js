@@ -1,15 +1,19 @@
 var map
 var latitude = 25;
 var longitude = -80;
+var defaultZoom = 3
 function initMap() {
   var defaultCenter = {lat: latitude, lng: longitude}
   map = new google.maps.Map(document.getElementById('map'), {
     center: defaultCenter,
-    zoom: 3,
+    zoom: defaultZoom,
     draggable: false,
+    zoomControl: true,
+    scrollwheel: true,
+    disableDoubleClickZoom: false,
+    streetViewControl: false,
     zoomControl: false,
-    scrollwheel: false,
-    disableDoubleClickZoom: true,
+    mapTypeControl: false,
     styles: [
             {elementType: 'geometry', stylers: [{color: '#1f1514'}]},
             {elementType: 'labels.text.stroke', stylers: [{color: '#1f1514'}]},
@@ -118,9 +122,44 @@ dropzone.on("complete", function(file) {
         latDecDegrees = (photoLatitude[0] + (photoLatitude[1]/60) + (photoLatitude[2]/(60*60))).toFixed(4) * (photoLatitudeRef == "N" ? 1 : -1);
         longDecDegrees = (photoLongitude[0] + (photoLongitude[1]/60) + (photoLongitude[2]/(60*60))).toFixed(4) * (photoLongitudeRef == "W" ? -1 : 1);
 
-        clearInterval(mapRotation);
 
         var panPoint = new google.maps.LatLng(latDecDegrees, longDecDegrees)
-        map.panTo(panPoint)
+        var marker = new google.maps.Marker({
+          position: panPoint,
+          map: map
+        });
+
+        $("#dropzone").fadeOut(1500);
+        $("#dimmer").fadeOut(1500, function(){
+          clearInterval(mapRotation);
+
+          map.panTo(panPoint)
+          map.setCenter(panPoint);
+
+          setTimeout(function(){
+            map.setZoom(10);
+            setTimeout(function(){
+              map.setZoom(18);
+              setTimeout(function(){
+                $("#map").hide()
+                $("#pano").show()
+                $("#reset").show()
+                var panorama = new google.maps.StreetViewPanorama(
+                    document.getElementById('pano'), {
+                      position: panPoint,
+                      pov: {
+                        heading: 34,
+                        pitch: 10
+                      }
+                    });
+                map.setStreetView(panorama);
+              }, 1000);
+            }, 1000)
+          }, 1000)
+        });
   });
+});
+
+$("#reset").click(function(){
+  window.location.reload()
 });

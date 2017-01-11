@@ -1,1 +1,2 @@
-AIzaSyCZDFv6Ctmru5vSx6qLaAKzhy4oPC_CQ2c
+maps: AIzaSyCZDFv6Ctmru5vSx6qLaAKzhy4oPC_CQ2c
+streetview: AIzaSyB08ovsAjvj8mYuNG6ZwqukK8Sg4kxpKRo
