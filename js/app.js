@@ -1,9 +1,15 @@
-var map;
+var map
+var latitude = 25;
+var longitude = -80;
 function initMap() {
-  var defaultCenter = {lat: 20, lng: -80}
+  var defaultCenter = {lat: latitude, lng: longitude}
   map = new google.maps.Map(document.getElementById('map'), {
     center: defaultCenter,
     zoom: 3,
+    draggable: false,
+    zoomControl: false,
+    scrollwheel: false,
+    disableDoubleClickZoom: true,
     styles: [
             {elementType: 'geometry', stylers: [{color: '#1f1514'}]},
             {elementType: 'labels.text.stroke', stylers: [{color: '#1f1514'}]},
@@ -88,11 +94,33 @@ function initMap() {
   panMap(map)
 }
 
+var mapRotation
 function panMap(map) {
-  var longitude = -80
-  setInterval(function(){
+  mapRotation = setInterval(function(){
     longitude++
-    var panPoint = new google.maps.LatLng(20, longitude)
+    var panPoint = new google.maps.LatLng(latitude, longitude)
     map.panTo(panPoint)
   }, 90)
 }
+
+var dropzone = new Dropzone("#dropzone");
+dropzone.on("complete", function(file) {
+  var latDecDegrees
+  var longDecDegrees
+
+  EXIF.getData(file, function() {
+        var photoLatitude = EXIF.getTag(this, "GPSLatitude")
+        var photoLongitude = EXIF.getTag(this, "GPSLongitude")
+
+        var photoLatitudeRef = EXIF.getTag(this, "GPSLatitudeRef") || "N";
+        var photoLongitudeRef = EXIF.getTag(this, "GPSLongitudeRef") || "W";
+
+        latDecDegrees = (photoLatitude[0] + (photoLatitude[1]/60) + (photoLatitude[2]/(60*60))).toFixed(4) * (photoLatitudeRef == "N" ? 1 : -1);
+        longDecDegrees = (photoLongitude[0] + (photoLongitude[1]/60) + (photoLongitude[2]/(60*60))).toFixed(4) * (photoLongitudeRef == "W" ? -1 : 1);
+
+        clearInterval(mapRotation);
+
+        var panPoint = new google.maps.LatLng(latDecDegrees, longDecDegrees)
+        map.panTo(panPoint)
+  });
+});
