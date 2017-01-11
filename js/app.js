@@ -125,7 +125,9 @@ function initMap() {
             }]
         }]
     });
-    panMap(map)
+    setTimeout(function() {
+        panMap(map)
+    }, 1000)
 }
 
 var mapRotation
